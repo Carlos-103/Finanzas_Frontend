@@ -15,14 +15,14 @@ const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #0b0f1a; color: #e8e6df; }
+  body { font-family: 'DM Sans', sans-serif; background: #32717c; color: #e8e6df; }
 
   :root {
     --bg:       #0b0f1a;
     --surface:  #131929;
     --card:     #192035;
     --border:   #253050;
-    --accent:   #4f8ef7;
+    --accent:   #2f9aad;
     --green:    #3ecf8e;
     --red:      #f76f6f;
     --muted:    #8492b0;
@@ -34,7 +34,7 @@ const STYLES = `
 
   .login-wrap {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at 60% 40%, #1a2545 0%, #0b0f1a 70%);
+    background: radial-gradient(ellipse at 60% 40%, #44a7c0 0%, #102c42 70%);
   }
   .login-box {
     width: 380px; background: var(--card); border: 1px solid var(--border);
@@ -71,7 +71,7 @@ const STYLES = `
     border-left: 3px solid transparent; transition: all .15s;
   }
   .nav-item:hover { color: var(--text); background: #ffffff08; }
-  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: #4f8ef712; }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: #589bff11; }
   .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
   .sidebar-footer { margin-top: auto; padding: 0 28px; }
   .logout-btn {
@@ -211,12 +211,18 @@ function PieChart({ income, expense, canvasRef }) {
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, r, startAngle, startAngle + incomeAngle);
     ctx.closePath();
-    ctx.fillStyle = "#4f8ef7";
+    ctx.fillStyle = "#4fdef7";
     ctx.fill();
 
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, startAngle + incomeAngle, startAngle + incomeAngle + expenseAngle);
+    ctx.arc(
+      cx,
+      cy,
+      r,
+      startAngle + incomeAngle,
+      startAngle + incomeAngle + expenseAngle,
+    );
     ctx.closePath();
     ctx.fillStyle = "#f76f6f";
     ctx.fill();
@@ -229,13 +235,17 @@ function PieChart({ income, expense, canvasRef }) {
     ctx.fillStyle = "#cce4ff";
     ctx.fillText("Entradas", cx, cy + 12);
     ctx.fillStyle = "#ffaaaa";
-    ctx.fillText(`${((expense / total) * 100).toFixed(1)}% Salidas`, cx, cy + 30);
+    ctx.fillText(
+      `${((expense / total) * 100).toFixed(1)}% Salidas`,
+      cx,
+      cy + 30,
+    );
 
     const legendY = cy + r + 35;
 
     ctx.beginPath();
     ctx.arc(40, legendY, 7, 0, 2 * Math.PI);
-    ctx.fillStyle = "#4f8ef7";
+    ctx.fillStyle = "#4ff7f7";
     ctx.fill();
     ctx.fillStyle = "#cce4ff";
     ctx.font = "bold 13px sans-serif";
@@ -296,7 +306,13 @@ export default function App() {
   function normalizarTransaccion(t) {
     return {
       id: t.id,
-      tipo: t.tipo || t.category?.name || t.categoryName || t.categoryCode || t.type || "",
+      tipo:
+        t.tipo ||
+        t.category?.name ||
+        t.categoryName ||
+        t.categoryCode ||
+        t.type ||
+        "",
       monto: Number(t.monto ?? t.amount ?? 0),
       fecha: (t.fecha || t.transactionDate || "").toString().slice(0, 10),
       factura: t.factura || t.invoiceUrl || t.invoice || null,
@@ -307,13 +323,17 @@ export default function App() {
     if (!item) return null;
     if (item.factura && /^https?:\/\//.test(item.factura)) return item.factura;
     if (item.factura && item.factura.startsWith("data:")) return item.factura;
-    if (item.id) return `http://localhost:3000/api/v1/transaction/invoices/${item.id}`;
+    if (item.id)
+      return `http://localhost:3000/api/v1/transaction/invoices/${item.id}`;
     return null;
   }
 
   async function recargarDatos() {
     try {
-      const [entradasData, salidasData] = await Promise.all([getEntradas(), getSalidas()]);
+      const [entradasData, salidasData] = await Promise.all([
+        getEntradas(),
+        getSalidas(),
+      ]);
 
       const entradasLista = entradasData.data || entradasData || [];
       const salidasLista = salidasData.data || salidasData || [];
@@ -332,7 +352,10 @@ export default function App() {
 
     Promise.all([getCategorias("INCOME"), getCategorias("EXPENSE")])
       .then(([incomeCats, expenseCats]) => {
-        setCategorias([...(incomeCats.data || incomeCats), ...(expenseCats.data || expenseCats)]);
+        setCategorias([
+          ...(incomeCats.data || incomeCats),
+          ...(expenseCats.data || expenseCats),
+        ]);
       })
       .catch(console.error);
   }, [loggedIn]);
@@ -374,11 +397,18 @@ export default function App() {
   }
 
   async function submitEntrada() {
-    if (!eForm.categoryId || !eForm.monto || !eForm.fecha || !eForm.facturaFile) return;
+    if (!eForm.categoryId || !eForm.monto || !eForm.fecha || !eForm.facturaFile)
+      return;
 
     setLoading(true);
     try {
-      await createTransaccion("INCOME", eForm.categoryId, eForm.monto, eForm.fecha, eForm.facturaFile);
+      await createTransaccion(
+        "INCOME",
+        eForm.categoryId,
+        eForm.monto,
+        eForm.fecha,
+        eForm.facturaFile,
+      );
 
       await recargarDatos();
 
@@ -405,7 +435,7 @@ export default function App() {
           ? error.response.data.message.join(" ")
           : error?.response?.data?.message) ||
           error?.response?.data?.error ||
-          "❌ Error al guardar entrada."
+          "❌ Error al guardar entrada.",
       );
       setTimeout(() => setSuccess(""), 5000);
     } finally {
@@ -414,11 +444,18 @@ export default function App() {
   }
 
   async function submitSalida() {
-    if (!sForm.categoryId || !sForm.monto || !sForm.fecha || !sForm.facturaFile) return;
+    if (!sForm.categoryId || !sForm.monto || !sForm.fecha || !sForm.facturaFile)
+      return;
 
     setLoading(true);
     try {
-      await createTransaccion("EXPENSE", sForm.categoryId, sForm.monto, sForm.fecha, sForm.facturaFile);
+      await createTransaccion(
+        "EXPENSE",
+        sForm.categoryId,
+        sForm.monto,
+        sForm.fecha,
+        sForm.facturaFile,
+      );
 
       await recargarDatos();
 
@@ -445,7 +482,7 @@ export default function App() {
           ? error.response.data.message.join(" ")
           : error?.response?.data?.message) ||
           error?.response?.data?.error ||
-          "❌ Error al guardar salida."
+          "❌ Error al guardar salida.",
       );
       setTimeout(() => setSuccess(""), 5000);
     } finally {
@@ -458,7 +495,11 @@ export default function App() {
   const balance = totalIn - totalOut;
 
   async function exportPDF() {
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
     const fechaHoy = new Date().toLocaleDateString("es-ES");
     const pageW = doc.internal.pageSize.getWidth();
 
@@ -488,13 +529,20 @@ export default function App() {
         ["Balance Neto", `$${balance.toLocaleString()}`],
       ],
       theme: "grid",
-      headStyles: { fillColor: [15, 23, 42], textColor: [79, 142, 247], fontStyle: "bold" },
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [79, 142, 247],
+        fontStyle: "bold",
+      },
       bodyStyles: { fontSize: 10 },
       didParseCell(data) {
-        if (data.row.index === 0 && data.column.index === 1) data.cell.styles.textColor = [62, 207, 142];
-        if (data.row.index === 1 && data.column.index === 1) data.cell.styles.textColor = [247, 111, 111];
+        if (data.row.index === 0 && data.column.index === 1)
+          data.cell.styles.textColor = [62, 207, 142];
+        if (data.row.index === 1 && data.column.index === 1)
+          data.cell.styles.textColor = [247, 111, 111];
         if (data.row.index === 2 && data.column.index === 1) {
-          data.cell.styles.textColor = balance >= 0 ? [62, 207, 142] : [247, 111, 111];
+          data.cell.styles.textColor =
+            balance >= 0 ? [62, 207, 142] : [247, 111, 111];
         }
       },
       margin: { left: 14, right: 14 },
@@ -509,12 +557,21 @@ export default function App() {
     autoTable(doc, {
       startY: y1 + 4,
       head: [["#", "Tipo", "Monto", "Fecha"]],
-      body: entradas.map((e, i) => [i + 1, e.tipo, `$${Number(e.monto || 0).toLocaleString()}`, e.fecha]),
+      body: entradas.map((e, i) => [
+        i + 1,
+        e.tipo,
+        `$${Number(e.monto || 0).toLocaleString()}`,
+        e.fecha,
+      ]),
       theme: "striped",
       headStyles: { fillColor: [25, 50, 40], textColor: [62, 207, 142] },
       bodyStyles: { fontSize: 9, textColor: [30, 30, 30] },
       foot: [["", "TOTAL", `$${totalIn.toLocaleString()}`, ""]],
-      footStyles: { fillColor: [240, 255, 248], textColor: [30, 30, 30], fontStyle: "bold" },
+      footStyles: {
+        fillColor: [240, 255, 248],
+        textColor: [30, 30, 30],
+        fontStyle: "bold",
+      },
       margin: { left: 14, right: 14 },
     });
 
@@ -527,12 +584,21 @@ export default function App() {
     autoTable(doc, {
       startY: y2 + 4,
       head: [["#", "Tipo", "Monto", "Fecha"]],
-      body: salidas.map((s, i) => [i + 1, s.tipo, `$${Number(s.monto || 0).toLocaleString()}`, s.fecha]),
+      body: salidas.map((s, i) => [
+        i + 1,
+        s.tipo,
+        `$${Number(s.monto || 0).toLocaleString()}`,
+        s.fecha,
+      ]),
       theme: "striped",
       headStyles: { fillColor: [50, 25, 25], textColor: [247, 111, 111] },
       bodyStyles: { fontSize: 9, textColor: [30, 30, 30] },
       foot: [["", "TOTAL", `$${totalOut.toLocaleString()}`, ""]],
-      footStyles: { fillColor: [255, 245, 245], textColor: [30, 30, 30], fontStyle: "bold" },
+      footStyles: {
+        fillColor: [255, 245, 245],
+        textColor: [30, 30, 30],
+        fontStyle: "bold",
+      },
       margin: { left: 14, right: 14 },
     });
 
@@ -563,7 +629,9 @@ export default function App() {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(150);
-      doc.text(`FinanzApp — Página ${i} de ${pageCount}`, pageW / 2, 290, { align: "center" });
+      doc.text(`FinanzApp — Página ${i} de ${pageCount}`, pageW / 2, 290, {
+        align: "center",
+      });
     }
 
     doc.save(`reporte-balance-${fechaHoy.replace(/\//g, "-")}.pdf`);
@@ -585,11 +653,14 @@ export default function App() {
           </div>
           <div className="stat-card">
             <div className="stat-label">Balance</div>
-            <div className={`stat-value ${balance >= 0 ? "blue" : "red"}`}>{fmt(balance)}</div>
+            <div className={`stat-value ${balance >= 0 ? "blue" : "red"}`}>
+              {fmt(balance)}
+            </div>
           </div>
         </div>
         <div style={{ color: "var(--muted)", fontSize: ".85rem" }}>
-          Utiliza el menú lateral para registrar movimientos, ver el historial o consultar tu balance.
+          Utiliza el menú lateral para registrar movimientos, ver el historial o
+          consultar tu balance.
         </div>
       </>
     ),
@@ -605,7 +676,9 @@ export default function App() {
               <label>Tipo de entrada</label>
               <select
                 value={eForm.categoryId}
-                onChange={(e) => setEForm((f) => ({ ...f, categoryId: e.target.value }))}
+                onChange={(e) =>
+                  setEForm((f) => ({ ...f, categoryId: e.target.value }))
+                }
               >
                 <option value="">Seleccionar...</option>
                 {categorias
@@ -625,7 +698,9 @@ export default function App() {
                 min="0"
                 placeholder="0.00"
                 value={eForm.monto}
-                onChange={(e) => setEForm((f) => ({ ...f, monto: e.target.value }))}
+                onChange={(e) =>
+                  setEForm((f) => ({ ...f, monto: e.target.value }))
+                }
               />
             </div>
 
@@ -634,16 +709,27 @@ export default function App() {
               <input
                 type="date"
                 value={eForm.fecha}
-                onChange={(e) => setEForm((f) => ({ ...f, fecha: e.target.value }))}
+                onChange={(e) =>
+                  setEForm((f) => ({ ...f, fecha: e.target.value }))
+                }
               />
             </div>
 
             <div className="field full">
               <label>Factura (foto)</label>
-              <div className="upload-zone" onClick={() => eFileRef.current.click()}>
+              <div
+                className="upload-zone"
+                onClick={() => eFileRef.current.click()}
+              >
                 <span style={{ fontSize: "1.8rem" }}>📎</span>
                 <p>Haz clic para subir imagen de factura</p>
-                {eForm.preview && <img src={eForm.preview} alt="preview" className="upload-preview" />}
+                {eForm.preview && (
+                  <img
+                    src={eForm.preview}
+                    alt="preview"
+                    className="upload-preview"
+                  />
+                )}
               </div>
               <input
                 type="file"
@@ -656,7 +742,12 @@ export default function App() {
           </div>
 
           <div className="submit-row">
-            <button className="btn-primary" style={{ flex: 1 }} onClick={submitEntrada} disabled={loading}>
+            <button
+              className="btn-primary"
+              style={{ flex: 1 }}
+              onClick={submitEntrada}
+              disabled={loading}
+            >
               {loading ? "Guardando..." : "Guardar Entrada"}
             </button>
             <button
@@ -691,7 +782,9 @@ export default function App() {
               <label>Tipo de salida</label>
               <select
                 value={sForm.categoryId}
-                onChange={(e) => setSForm((f) => ({ ...f, categoryId: e.target.value }))}
+                onChange={(e) =>
+                  setSForm((f) => ({ ...f, categoryId: e.target.value }))
+                }
               >
                 <option value="">Seleccionar...</option>
                 {categorias
@@ -711,7 +804,9 @@ export default function App() {
                 min="0"
                 placeholder="0.00"
                 value={sForm.monto}
-                onChange={(e) => setSForm((f) => ({ ...f, monto: e.target.value }))}
+                onChange={(e) =>
+                  setSForm((f) => ({ ...f, monto: e.target.value }))
+                }
               />
             </div>
 
@@ -720,16 +815,27 @@ export default function App() {
               <input
                 type="date"
                 value={sForm.fecha}
-                onChange={(e) => setSForm((f) => ({ ...f, fecha: e.target.value }))}
+                onChange={(e) =>
+                  setSForm((f) => ({ ...f, fecha: e.target.value }))
+                }
               />
             </div>
 
             <div className="field full">
               <label>Factura de salida (foto)</label>
-              <div className="upload-zone" onClick={() => sFileRef.current.click()}>
+              <div
+                className="upload-zone"
+                onClick={() => sFileRef.current.click()}
+              >
                 <span style={{ fontSize: "1.8rem" }}>📎</span>
                 <p>Haz clic para subir imagen de factura</p>
-                {sForm.preview && <img src={sForm.preview} alt="preview" className="upload-preview" />}
+                {sForm.preview && (
+                  <img
+                    src={sForm.preview}
+                    alt="preview"
+                    className="upload-preview"
+                  />
+                )}
               </div>
               <input
                 type="file"
@@ -742,7 +848,12 @@ export default function App() {
           </div>
 
           <div className="submit-row">
-            <button className="btn-primary" style={{ flex: 1 }} onClick={submitSalida} disabled={loading}>
+            <button
+              className="btn-primary"
+              style={{ flex: 1 }}
+              onClick={submitSalida}
+              disabled={loading}
+            >
               {loading ? "Guardando..." : "Guardar Salida"}
             </button>
             <button
@@ -774,7 +885,9 @@ export default function App() {
         <div className="table-wrap">
           <div className="table-header">
             <span className="table-title">Historial de Entradas</span>
-            <span style={{ color: "var(--green)", fontWeight: 700 }}>Total: {fmt(totalIn)}</span>
+            <span style={{ color: "var(--green)", fontWeight: 700 }}>
+              Total: {fmt(totalIn)}
+            </span>
           </div>
           <table>
             <thead>
@@ -793,7 +906,9 @@ export default function App() {
                   <td>
                     <span className="badge badge-green">{e.tipo}</span>
                   </td>
-                  <td style={{ color: "var(--green)", fontWeight: 600 }}>{fmt(e.monto)}</td>
+                  <td style={{ color: "var(--green)", fontWeight: 600 }}>
+                    {fmt(e.monto)}
+                  </td>
                   <td style={{ color: "var(--muted)" }}>{e.fecha}</td>
                   <td>
                     {getImageUrl(e) ? (
@@ -804,7 +919,11 @@ export default function App() {
                         onClick={() => setImgModal(getImageUrl(e))}
                       />
                     ) : (
-                      <span style={{ color: "var(--muted)", fontSize: ".8rem" }}>Sin imagen</span>
+                      <span
+                        style={{ color: "var(--muted)", fontSize: ".8rem" }}
+                      >
+                        Sin imagen
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -823,7 +942,9 @@ export default function App() {
         <div className="table-wrap">
           <div className="table-header">
             <span className="table-title">Historial de Salidas</span>
-            <span style={{ color: "var(--red)", fontWeight: 700 }}>Total: {fmt(totalOut)}</span>
+            <span style={{ color: "var(--red)", fontWeight: 700 }}>
+              Total: {fmt(totalOut)}
+            </span>
           </div>
           <table>
             <thead>
@@ -842,7 +963,9 @@ export default function App() {
                   <td>
                     <span className="badge badge-red">{s.tipo}</span>
                   </td>
-                  <td style={{ color: "var(--red)", fontWeight: 600 }}>{fmt(s.monto)}</td>
+                  <td style={{ color: "var(--red)", fontWeight: 600 }}>
+                    {fmt(s.monto)}
+                  </td>
                   <td style={{ color: "var(--muted)" }}>{s.fecha}</td>
                   <td>
                     {getImageUrl(s) ? (
@@ -853,7 +976,11 @@ export default function App() {
                         onClick={() => setImgModal(getImageUrl(s))}
                       />
                     ) : (
-                      <span style={{ color: "var(--muted)", fontSize: ".8rem" }}>Sin imagen</span>
+                      <span
+                        style={{ color: "var(--muted)", fontSize: ".8rem" }}
+                      >
+                        Sin imagen
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -872,27 +999,66 @@ export default function App() {
         <div className="balance-result">
           <div>
             <div className="balance-result-label">Balance Mensual</div>
-            <div className={`balance-result-value ${balance >= 0 ? "green" : "red"}`}>{fmt(balance)}</div>
+            <div
+              className={`balance-result-value ${balance >= 0 ? "green" : "red"}`}
+            >
+              {fmt(balance)}
+            </div>
           </div>
           <div style={{ marginLeft: "auto", display: "flex", gap: 24 }}>
             <div>
-              <div style={{ color: "var(--muted)", fontSize: ".75rem", fontWeight: 600, textTransform: "uppercase" }}>
+              <div
+                style={{
+                  color: "var(--muted)",
+                  fontSize: ".75rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                }}
+              >
                 Entradas
               </div>
-              <div style={{ color: "var(--green)", fontWeight: 700, fontSize: "1.1rem" }}>{fmt(totalIn)}</div>
+              <div
+                style={{
+                  color: "var(--green)",
+                  fontWeight: 700,
+                  fontSize: "1.1rem",
+                }}
+              >
+                {fmt(totalIn)}
+              </div>
             </div>
             <div>
-              <div style={{ color: "var(--muted)", fontSize: ".75rem", fontWeight: 600, textTransform: "uppercase" }}>
+              <div
+                style={{
+                  color: "var(--muted)",
+                  fontSize: ".75rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                }}
+              >
                 Salidas
               </div>
-              <div style={{ color: "var(--red)", fontWeight: 700, fontSize: "1.1rem" }}>{fmt(totalOut)}</div>
+              <div
+                style={{
+                  color: "var(--red)",
+                  fontWeight: 700,
+                  fontSize: "1.1rem",
+                }}
+              >
+                {fmt(totalOut)}
+              </div>
             </div>
           </div>
         </div>
 
         <div className="balance-grid">
           <div className="balance-table-wrap">
-            <div className="balance-table-title" style={{ color: "var(--green)" }}>📈 Entradas</div>
+            <div
+              className="balance-table-title"
+              style={{ color: "var(--green)" }}
+            >
+              📈 Entradas
+            </div>
             <table>
               <thead>
                 <tr>
@@ -916,7 +1082,12 @@ export default function App() {
           </div>
 
           <div className="balance-table-wrap">
-            <div className="balance-table-title" style={{ color: "var(--red)" }}>📉 Salidas</div>
+            <div
+              className="balance-table-title"
+              style={{ color: "var(--red)" }}
+            >
+              📉 Salidas
+            </div>
             <table>
               <thead>
                 <tr>
@@ -941,11 +1112,15 @@ export default function App() {
         </div>
 
         <div className="chart-wrap" ref={chartRef}>
-          <div className="chart-title">Gráfico de balance — Entradas vs Salidas</div>
+          <div className="chart-title">
+            Gráfico de balance — Entradas vs Salidas
+          </div>
           <PieChart income={totalIn} expense={totalOut} canvasRef={canvasRef} />
         </div>
 
-        <button className="export-btn" onClick={exportPDF}>⬇ Descargar PDF</button>
+        <button className="export-btn" onClick={exportPDF}>
+          ⬇ Descargar PDF
+        </button>
       </>
     ),
   };
@@ -1002,7 +1177,14 @@ export default function App() {
 
             {loginErr && <div className="error-msg">{loginErr}</div>}
 
-            <div style={{ marginTop: 16, color: "var(--muted)", fontSize: ".78rem", textAlign: "center" }}>
+            <div
+              style={{
+                marginTop: 16,
+                color: "var(--muted)",
+                fontSize: ".78rem",
+                textAlign: "center",
+              }}
+            >
               Demo: admin o admin@example.com / admin123
             </div>
           </div>
