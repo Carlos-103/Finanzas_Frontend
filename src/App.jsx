@@ -10,23 +10,26 @@ import {
   createTransaccion,
 } from "./api";
 
+const LOGO_SRC = "src\assets\Logo.jpeg";
+
 // ─── Colores y estilos globales ───────────────────────────────────────────────
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #32717c; color: #e8e6df; }
+  body { font-family: 'DM Sans', sans-serif; background: #060e12; color: #e2f0f2; }
 
   :root {
-    --bg:       #0b0f1a;
-    --surface:  #131929;
-    --card:     #192035;
-    --border:   #253050;
-    --accent:   #2f9aad;
-    --green:    #3ecf8e;
-    --red:      #f76f6f;
-    --muted:    #8492b0;
-    --text:     #e8e6df;
+    --bg:       #060e12;
+    --surface:  #0a1a20;
+    --card:     #0f2029;
+    --border:   #1a3a45;
+    --accent:   #2ab8c8;
+    --accent2:  #4dd4e0;
+    --green:    #22d3a5;
+    --red:      #f87171;
+    --muted:    #5a8a95;
+    --text:     #e2f0f2;
     --heading:  'DM Serif Display', serif;
   }
 
@@ -34,26 +37,30 @@ const STYLES = `
 
   .login-wrap {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at 60% 40%, #44a7c0 0%, #102c42 70%);
+    background: radial-gradient(ellipse at 50% 30%, #0d2f3a 0%, #060e12 65%);
   }
   .login-box {
-    width: 380px; background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 48px 40px; box-shadow: 0 24px 80px #0007;
+    width: 420px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 52px 44px; box-shadow: 0 32px 100px #00000088;
   }
-  .login-logo { font-family: var(--heading); font-size: 2rem; color: var(--accent); margin-bottom: 8px; }
-  .login-sub  { color: var(--muted); font-size: .85rem; margin-bottom: 36px; }
+  .login-logo {
+    display: block; width: 210px; margin: 0 auto 28px;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 14px #2ab8c855);
+  }
+  .login-sub  { color: var(--muted); font-size: .85rem; margin-bottom: 36px; text-align: center; }
   .field { margin-bottom: 20px; }
   .field label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
   .field input {
     width: 100%; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: .95rem;
-    outline: none; transition: border-color .2s;
+    border-radius: 12px; padding: 13px 16px; color: var(--text); font-size: .95rem;
+    outline: none; transition: border-color .2s, box-shadow .2s;
   }
-  .field input:focus { border-color: var(--accent); }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #2ab8c822; }
   .btn-primary {
-    width: 100%; background: var(--accent); color: #fff; border: none;
-    border-radius: 10px; padding: 13px; font-size: .95rem; font-weight: 600;
-    cursor: pointer; transition: opacity .2s, transform .1s;
+    width: 100%; background: linear-gradient(135deg, #2ab8c8, #1a8fa0); color: #fff; border: none;
+    border-radius: 12px; padding: 14px; font-size: .95rem; font-weight: 600;
+    cursor: pointer; transition: opacity .2s, transform .1s; letter-spacing: .03em;
   }
   .btn-primary:hover  { opacity: .88; }
   .btn-primary:active { transform: scale(.98); }
@@ -61,25 +68,30 @@ const STYLES = `
 
   .layout { display: flex; min-height: 100vh; }
   .sidebar {
-    width: 240px; background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; padding: 32px 0; flex-shrink: 0;
+    width: 255px; background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 28px 0; flex-shrink: 0;
+    box-shadow: 4px 0 24px #00000044;
   }
-  .sidebar-logo { font-family: var(--heading); font-size: 1.5rem; color: var(--accent); padding: 0 28px 32px; }
+  .sidebar-logo {
+    display: block; width: 160px; margin: 0 auto 32px;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 8px #2ab8c844);
+  }
   .nav-item {
     display: flex; align-items: center; gap: 12px; padding: 12px 28px;
     color: var(--muted); font-size: .9rem; font-weight: 500; cursor: pointer;
     border-left: 3px solid transparent; transition: all .15s;
   }
-  .nav-item:hover { color: var(--text); background: #ffffff08; }
-  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: #589bff11; }
+  .nav-item:hover { color: var(--text); background: #2ab8c810; }
+  .nav-item.active { color: var(--accent2); border-left-color: var(--accent); background: #2ab8c818; }
   .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
-  .sidebar-footer { margin-top: auto; padding: 0 28px; }
+  .sidebar-footer { margin-top: auto; padding: 0 20px; }
   .logout-btn {
     width: 100%; background: transparent; border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px; color: var(--muted); font-size: .85rem;
+    border-radius: 10px; padding: 10px; color: var(--muted); font-size: .85rem;
     cursor: pointer; transition: all .15s;
   }
-  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); background: #f8717110; }
 
   .main { flex: 1; overflow-y: auto; padding: 40px 48px; }
   .page-title { font-family: var(--heading); font-size: 2rem; margin-bottom: 8px; }
@@ -87,14 +99,15 @@ const STYLES = `
 
   .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 36px; }
   .stat-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 24px 28px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 26px 30px; transition: border-color .2s, box-shadow .2s;
   }
+  .stat-card:hover { border-color: var(--accent); box-shadow: 0 4px 24px #2ab8c820; }
   .stat-label { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
   .stat-value { font-family: var(--heading); font-size: 2rem; }
   .stat-value.green { color: var(--green); }
   .stat-value.red   { color: var(--red); }
-  .stat-value.blue  { color: var(--accent); }
+  .stat-value.blue  { color: var(--accent2); }
 
   .form-card {
     background: var(--card); border: 1px solid var(--border);
@@ -503,25 +516,38 @@ export default function App() {
     const fechaHoy = new Date().toLocaleDateString("es-ES");
     const pageW = doc.internal.pageSize.getWidth();
 
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, pageW, 40, "F");
-    doc.setTextColor(79, 142, 247);
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
-    doc.text("FinanzApp", 14, 18);
-    doc.setTextColor(200, 210, 230);
+    // ── Encabezado con color teal y logo ──
+    doc.setFillColor(6, 14, 18);
+    doc.rect(0, 0, pageW, 44, "F");
+
+    // Logo en el PDF
+    try {
+      doc.addImage(LOGO_SRC, "PNG", 10, 6, 52, 30);
+    } catch (e) {
+      doc.setTextColor(42, 184, 200);
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("FinanzApp", 14, 22);
+    }
+
+    // Línea decorativa teal debajo del encabezado
+    doc.setDrawColor(42, 184, 200);
+    doc.setLineWidth(0.8);
+    doc.line(0, 44, pageW, 44);
+
+    doc.setTextColor(180, 230, 235);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text("Reporte Mensual de Balance", 14, 28);
-    doc.text(`Generado: ${fechaHoy}`, pageW - 14, 28, { align: "right" });
+    doc.text("Reporte Mensual de Balance", 70, 26);
+    doc.text(`Generado: ${fechaHoy}`, pageW - 14, 26, { align: "right" });
 
     doc.setTextColor(30, 30, 30);
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
-    doc.text("Resumen General", 14, 52);
+    doc.text("Resumen General", 14, 56);
 
     autoTable(doc, {
-      startY: 56,
+      startY: 60,
       head: [["Concepto", "Monto"]],
       body: [
         ["Total Entradas", `$${totalIn.toLocaleString()}`],
@@ -530,8 +556,8 @@ export default function App() {
       ],
       theme: "grid",
       headStyles: {
-        fillColor: [15, 23, 42],
-        textColor: [79, 142, 247],
+        fillColor: [6, 14, 18],
+        textColor: [42, 184, 200],
         fontStyle: "bold",
       },
       bodyStyles: { fontSize: 10 },
@@ -551,8 +577,11 @@ export default function App() {
     const y1 = doc.lastAutoTable.finalY + 14;
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(62, 207, 142);
-    doc.text("Entradas", 14, y1);
+    doc.setTextColor(42, 184, 200);
+    // Indicador visual verde para Entradas
+    doc.setFillColor(42, 184, 200);
+    doc.roundedRect(14, y1 - 4, 4, 4, 1, 1, "F");
+    doc.text("Entradas", 21, y1);
 
     autoTable(doc, {
       startY: y1 + 4,
@@ -564,12 +593,12 @@ export default function App() {
         e.fecha,
       ]),
       theme: "striped",
-      headStyles: { fillColor: [25, 50, 40], textColor: [62, 207, 142] },
+      headStyles: { fillColor: [6, 30, 35], textColor: [42, 184, 200] },
       bodyStyles: { fontSize: 9, textColor: [30, 30, 30] },
       foot: [["", "TOTAL", `$${totalIn.toLocaleString()}`, ""]],
       footStyles: {
-        fillColor: [240, 255, 248],
-        textColor: [30, 30, 30],
+        fillColor: [230, 250, 252],
+        textColor: [6, 80, 90],
         fontStyle: "bold",
       },
       margin: { left: 14, right: 14 },
@@ -579,7 +608,10 @@ export default function App() {
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(247, 111, 111);
-    doc.text("Salidas", 14, y2);
+    // Indicador visual rojo para Salidas
+    doc.setFillColor(247, 111, 111);
+    doc.roundedRect(14, y2 - 4, 4, 4, 1, 1, "F");
+    doc.text("Salidas", 21, y2);
 
     autoTable(doc, {
       startY: y2 + 4,
@@ -1147,7 +1179,7 @@ export default function App() {
       {!loggedIn ? (
         <div className="login-wrap">
           <div className="login-box">
-            <div className="login-logo">FinanzApp</div>
+            <img src={LOGO_SRC} alt="FinanzApp" className="login-logo" />
             <div className="login-sub">Control de entradas y salidas</div>
 
             <div className="field">
@@ -1192,7 +1224,7 @@ export default function App() {
       ) : (
         <div className="layout">
           <aside className="sidebar">
-            <div className="sidebar-logo">FinanzApp</div>
+            <img src={LOGO_SRC} alt="FinanzApp" className="sidebar-logo" />
 
             {NAV.map((n) => (
               <div
