@@ -10,7 +10,7 @@ import {
   createTransaccion,
 } from "./api";
 
-const LOGO_SRC = "src\assets\Logo.jpeg";
+const LOGO_SRC = "src/assets/Logo.jpeg";
 
 // ─── Colores y estilos globales ───────────────────────────────────────────────
 const STYLES = `
